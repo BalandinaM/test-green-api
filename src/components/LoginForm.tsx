@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Credentials } from '../types'
+import { handleChangeValue } from '../utils'
 
 type Props = {
   onSend: (data: Credentials) => void
@@ -10,13 +11,6 @@ type Props = {
 export const LoginForm = ({ onSend, isLoading, error }: Props) => {
   const [idInstance, setIdInstance] = useState('')
   const [apiToken, setApiToken] = useState('')
-
-  const handleChangeValue = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    fn: (value: string) => void
-  ) => {
-    fn(e.currentTarget.value)
-  }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()

@@ -2,9 +2,9 @@ import { useState } from 'react'
 import './App.css'
 import { LoginForm } from './components/LoginForm'
 import type { Credentials } from './types'
-import { Chat } from './components/Chat'
+import { ChatPage } from './components/ChatPage'
 
-const BASE_API_URL = 'https://api.green-api.com'
+export const BASE_API_URL = 'https://api.green-api.com'
 
 function App() {
   const [isLoading, setIsLoading] = useState(false)
@@ -46,7 +46,7 @@ function App() {
   return (
     <>
       {credentials ? (
-        <Chat credentials={credentials} />
+        <ChatPage credentials={credentials} />
       ) : (
         <LoginForm onSend={onSend} isLoading={isLoading} error={error} />
       )}
