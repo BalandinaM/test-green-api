@@ -23,8 +23,9 @@ export const ChatWindow = ({ credentials, chatId, phoneNumber }: Props) => {
       while (isActive) {
         try {
           const res = await fetch(
-            `${BASE_API_URL}/waInstance${credentials.idInstance}/receiveNotification/${credentials.apiTokenInstance}?receiveTimeout=20`
+            `${BASE_API_URL}/waInstance${credentials.idInstance}/receiveNotification/${credentials.apiTokenInstance}?receiveTimeout=10`
           )
+          if (res.status === 408) continue // сервер не дождался уведомлений — это не ошибка
           if (!res.ok) throw new Error(`Ошибка сервера ${res.status}`)
           const json = await res.json()
           if (json === null) continue
