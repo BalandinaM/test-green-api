@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import './App.css'
 import { LoginForm } from './components/LoginForm'
 import type { Credentials } from './types'
 import { ChatPage } from './components/ChatPage'

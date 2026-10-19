@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { handleChangeValue } from '../utils'
+import s from './Form.module.css'
 
 type Props = {
   onSend: (value: number) => void
@@ -18,24 +19,34 @@ export const NewChatForm = ({ onSend, error, isLoading }: Props) => {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <label htmlFor="phoneNumber">Введите номер телефона</label>
-      <input
-        name="phoneNumber"
-        id="phoneNumber"
-        type="tel"
-        value={phoneNumber}
-        onChange={e => handleChangeValue(e, setPhoneNumber)}
-        placeholder="7XXXXXXXXXX"
-      />
-      <button
-        type="submit"
-        disabled={!isValidContact(phoneNumber) || isLoading}
-      >
-        Создать новый чат
-      </button>
-      {isLoading && <p>Loading....</p>}
-      {error && <p>{error}</p>}
-    </form>
+    <div className={s.page}>
+      <form className={s.card} onSubmit={handleSubmit}>
+        <h1 className={s.title}>Новый чат</h1>
+        <p className={s.subtitle}>Номер собеседника, зарегистрированного в MAX</p>
+        <div className={s.field}>
+          <label className={s.label} htmlFor="phoneNumber">
+            Номер телефона
+          </label>
+          <input
+            className={s.input}
+            name="phoneNumber"
+            id="phoneNumber"
+            type="tel"
+            value={phoneNumber}
+            onChange={e => handleChangeValue(e, setPhoneNumber)}
+            placeholder="7XXXXXXXXXX"
+          />
+        </div>
+        <button
+          className={s.button}
+          type="submit"
+          disabled={!isValidContact(phoneNumber) || isLoading}
+        >
+          Создать чат
+        </button>
+        {isLoading && <p className={s.status}>Ищем пользователя…</p>}
+        {error && <p className={s.error}>{error}</p>}
+      </form>
+    </div>
   )
 }

@@ -9,6 +9,7 @@ type Props = { credentials: Credentials }
 export const ChatPage = ({ credentials }: Props) => {
   const [isLoading, setIsLoading] = useState(false)
   const [chatId, setChatId] = useState<string | null>(null)
+  const [phoneNumber, setPhoneNumber] = useState('')
   const [error, setError] = useState<string | null>(null)
 
   const onSend = async (data: number) => {
@@ -28,6 +29,7 @@ export const ChatPage = ({ credentials }: Props) => {
       if (json.exist === false) {
         throw new Error('Пользователь с таким номером не зарегистрирован в MAX')
       }
+      setPhoneNumber(String(data))
       setChatId(json.chatId)
     } catch (e) {
       if (e instanceof TypeError) {
@@ -49,7 +51,11 @@ export const ChatPage = ({ credentials }: Props) => {
       {!chatId ? (
         <NewChatForm onSend={onSend} error={error} isLoading={isLoading} />
       ) : (
-        <ChatWindow credentials={credentials} chatId={chatId} />
+        <ChatWindow
+          credentials={credentials}
+          chatId={chatId}
+          phoneNumber={phoneNumber}
+        />
       )}
     </>
   )
