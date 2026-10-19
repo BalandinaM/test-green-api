@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BASE_API_URL } from '../App'
 import type { Credentials, Message } from '../types'
-import { handleChangeValue } from '../utils'
+import { handleChangeValue, sleep } from '../utils'
+import s from './ChatWindow.module.css'
 
 type Props = {
   credentials: Credentials
@@ -13,6 +14,58 @@ export const ChatWindow = ({ credentials, chatId }: Props) => {
   const [message, setMessage] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
+
+  useEffect(() => {
+    let isActive = true
+
+    const poll = async () => {
+      while (isActive) {
+        try {
+          const res = await fetch(
+            `${BASE_API_URL}/waInstance${credentials.idInstance}/receiveNotification/${credentials.apiTokenInstance}?receiveTimeout=20`
+          )
+          if (!res.ok) throw new Error(`Ошибка сервера ${res.status}`)
+          const json = await res.json()
+          if (json === null) continue
+          const { body } = json
+          if (
+            isActive &&
+            body.typeWebhook === 'incomingMessageReceived' &&
+            body.senderData.chatId === chatId &&
+            body.messageData.typeMessage === 'textMessage'
+          ) {
+            setMessages(prev =>
+              prev.some(m => m.id === body.idMessage)
+                ? prev
+                : [
+                    ...prev,
+                    {
+                      id: body.idMessage,
+                      text: body.messageData.textMessageData.textMessage,
+                      direction: 'incoming',
+                    },
+                  ]
+            )
+          }
+          const delRes = await fetch(
+            `${BASE_API_URL}/waInstance${credentials.idInstance}/deleteNotification/${credentials.apiTokenInstance}/${json.receiptId}`,
+            { method: 'DELETE' }
+          )
+          if (!delRes.ok) throw new Error(`Ошибка сервера ${delRes.status}`)
+        } catch (e) {
+          if (!isActive) return
+          setError(e instanceof Error ? e.message : 'Неизвестная ошибка')
+          await sleep(5000)
+        }
+      }
+    }
+    poll()
+
+    return () => {
+      isActive = false
+    }
+  }, [credentials, chatId])
+
   const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsLoading(true)
@@ -62,10 +115,7 @@ export const ChatWindow = ({ credentials, chatId }: Props) => {
       {messages.length ? (
         <ul>
           {messages.map(msg => (
-            <li
-              key={msg.id}
-              className={`s.message s.message--${msg.direction}`}
-            >
+            <li key={msg.id} className={`${s.message} ${s[msg.direction]}`}>
               {msg.text}
             </li>
           ))}
@@ -92,5 +142,3 @@ export const ChatWindow = ({ credentials, chatId }: Props) => {
     </div>
   )
 }
-
-// План на 19.10: правки выше и коммит, потом опрос receiveNotification / deleteNotification: входящие идут в тот же список с фильтром по chatId. Дальше стили, README, скрины и письмо. GitHub и Vercel мы так и не подключили, их лучше сделать в первой половине дня, чтобы вечером не оказалось сюрпризов с деплоем.
